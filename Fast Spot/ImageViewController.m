@@ -85,27 +85,13 @@
         dispatch_queue_t imageFetchQ = dispatch_queue_create("image fetcher", NULL); // NULL implies a serial queue
         dispatch_async(imageFetchQ, ^{
             
-            NSData *imageData = [[NSData alloc] init];
-#warning file system test code
-            //  Create an NSFileManager and the find the Caches Directory
-            NSFileManager *fileManager = [[NSFileManager alloc] init];
-            NSArray *urls = [fileManager URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
-            NSURL *cachesPath = [urls objectAtIndex:0];
+            //  Set the image url and photo id for the RecentPhotosCache class
+            self.cache.imageURL = self.imageURL; 
+            self.cache.photoId = self.photoId;
             
-            //  Create the file Path for storing the image using the photo id
-            NSURL *filePath = [cachesPath URLByAppendingPathComponent:self.photoId];
+            NSLog(@"size of cache is %d", [self.cache currentSizeOfCache]); 
             
-            //  Check if the file Path already exist
-            BOOL fileExist = [fileManager fileExistsAtPath:[filePath path]];
-            if (fileExist == NO) {
-                imageData = [[NSData alloc] initWithContentsOfURL:self.imageURL];
-                [imageData writeToURL:filePath atomically:YES];
-            }else{
-                //  Use the image if it already exist in the caches directory
-                imageData = [fileManager contentsAtPath:[filePath path]];
-            }
-            
-            UIImage *image = [UIImage imageWithData:imageData];
+            UIImage *image = [UIImage imageWithData:self.cache.imageData];
             
             //  dispatch UIKit updates to the main thread
             dispatch_async(dispatch_get_main_queue(), ^{

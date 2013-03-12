@@ -10,8 +10,10 @@
 
 @interface RecentPhotosCache : NSObject
 
-//  The file Path for storing the image using the photo id
-@property (nonatomic, strong) NSURL *filePath;
+@property (nonatomic, strong) NSString *photoId;
+@property (nonatomic, strong) NSURL *imageURL;
+@property (nonatomic, readonly) NSData *imageData;
 
+- (NSUInteger)currentSizeOfCache;
 
 @end
