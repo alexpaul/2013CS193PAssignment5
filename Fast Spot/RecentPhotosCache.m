@@ -16,11 +16,39 @@
 
 @implementation RecentPhotosCache
 
+#define CACHE_MAX 3000000 // 3MB
+
 - (NSUInteger)currentSizeOfCache
 {
 #warning incomplete implementation 
     int cacheSize = 0; 
     // Enumerate the contents of the caches directory and return the size of the images on disk
+    
+    NSArray *keys = [NSArray arrayWithObjects:NSURLIsDirectoryKey, NSURLIsPackageKey, NSURLLocalizedNameKey, nil];
+    
+    NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager]
+                                         enumeratorAtURL:self.cachesPath
+                                         includingPropertiesForKeys:keys
+                                         options:(NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles | NSDirectoryEnumerationSkipsSubdirectoryDescendants)
+                                         errorHandler:^(NSURL* url, NSError *error){
+                                             // Handle the error
+                                             // Return YES if the enumeration should contiune after the error
+                                             return NO;
+                                         }];
+    for (NSURL *url in enumerator) {
+        NSNumber *isDirectory;
+        [url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL];
+        //  Skips Directories
+        if ([isDirectory boolValue] == YES) {
+            [enumerator skipDescendants]; 
+        }
+        else{
+            NSLog(@"url is %@", url);
+            NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[url path] error:nil];
+            NSNumber *fileSize = [attributes objectForKey:NSFileSize];
+            NSLog(@"file size is %@", fileSize); 
+        }
+    }
     
     return cacheSize; 
 }
